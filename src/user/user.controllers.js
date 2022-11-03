@@ -1,14 +1,6 @@
-import UserModel from "./user.model";
-
-import {
-    validateEmail,
-    validatePassord,
-    validateStrings,
-    validateNickname,
-    validateDate,
-    hashPassword
-} from "../utils/functions";
 import mongoose from "mongoose";
+import UserModel from "./user.model";
+import { validateEmail, validatePassord, validateStrings, validateNickname, validateDate, hashPassword } from "../utils/functions";
 
 export const checkParamsIdIsValide = (req, res, next) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -44,6 +36,7 @@ export const createUser = async (req, res) => {
             const password = await hashPassword(data.password);
             const user = await new UserModel(getFinalUser(data, password)).save();
             res.status(201).send(mapFinalUser(user));
+            
         }
 
     } catch (error) {
@@ -54,7 +47,7 @@ export const createUser = async (req, res) => {
 
 }
 
-export const getAllUsers = async (req, res) => {;
+export const getAllUsers = async (req, res) => {
 
     try {
 
@@ -72,7 +65,6 @@ export const getAllUsers = async (req, res) => {;
 export const getUserById = async (req, res) => {
 
     try {
-        if (!mongoose.isValidObjectId(req.params.id));
         
         const user = await UserModel.findOne({_id: req.params.id});
         if (user) res.status(200).json(user)

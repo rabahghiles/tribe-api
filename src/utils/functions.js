@@ -35,6 +35,14 @@ export const validateDate = (stringDate) => {
 }
 
 
+export const validateSubStoryPath = (ref) => {
+    return String(ref)
+    .match(
+        /^stories(\/[a-zA-Z0-9\-]+)+$/
+    )
+}
+
+
 export const hashPassword = (password) => {
     return new Promise((resolve, reject) => {
         bcrypt.hash(password, 12)
@@ -43,11 +51,15 @@ export const hashPassword = (password) => {
     })
 }
 
-
 export const comparePassword = (password, hash) => {
     return new Promise((resolve, reject) => {
         bcrypt.compare(password, hash)
         .then((result) => resolve(result))
         .catch(error => reject(error));
     })
+}
+
+
+export const getIsoDate = (date) => {
+    return date.toISOString().split("T")[0]
 }
