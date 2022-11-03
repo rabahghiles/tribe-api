@@ -1,0 +1,33 @@
+{
+  "name": "tribe-api",
+  "author": "Rabah GHILES",
+  "description": "An api for tribe (a react app for writing cooperative stories)",
+  "version": "1.0.0",
+  "main": "app.js",
+  "keywords": [
+    "api",
+    "stories"
+  ],
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "body-parser": "^1.20.1",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-validator": "^6.14.2",
+    "firebase-admin": "^11.2.0",
+    "mongoose": "^6.7.0",
+    "nodemon": "^2.0.20"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
+  },
+  "scripts": {
+    "start": "nodemon ./app.js --exec babel-node -e js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rabahghiles/tribe-api.git"
+  }
+}

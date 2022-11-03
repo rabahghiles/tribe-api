@@ -1,0 +1,38 @@
+// const { initializeApp } = require('firebase-admin/app');
+
+// initializeApp({
+//     credential: applicationDefault(),
+//     databaseURL: 'https://tribe-fr.firebaseio.com'
+// });
+
+require("dotenv").config();
+
+const admin = require('firebase-admin');
+
+const serviceAccount = require(`${__dirname}/${process.env.FIREBASE_SERVICE_ACCOUNT}`)
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: 'https://tribe-fr.firebaseio.com'
+})
+
+const db = admin.firestore();
+
+const usersRef = db.collection('users');
+const getUsers = async (ref) => {
+    const users = await ref.get();
+    users.forEach(user => {
+    //   console.log(user.id, '=>', user.data());
+
+      if (user.data().name === "Rabah GHILES") {
+        db.collection(`users/${user.id}/books`).get()
+        .then(data => {
+            data.forEach(book => console.log(book.data()) )
+        })
+      }
+    });
+}
+
+getUsers(usersRef);
+
+
