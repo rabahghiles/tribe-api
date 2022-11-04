@@ -13,13 +13,12 @@ export const getTodayStory = async (req, res) => {
     try {
 
         const date = getIsoDate(new Date());
-        const stories = await todayStoryRef.where("created_at", "==", date).get();
+        const stories = await TODAY_STORY_REF.where("created_at", "==", date).get();
         if (stories.empty) res.status(404).send("Aucune histoire trouvées pour aujourd'hui")
         else {
             const storiesArray = [];
             stories.forEach( story => {
                 storiesArray.push(Object.assign(story.data(),{ref: story.ref.path}));
-                console.log(story.ref.path);
             });
             res.status(200).json(storiesArray[0]);
         }
@@ -48,25 +47,31 @@ export const createSubStory = async (req, res, next) => {
             res.status(400).send("Une erreur s'est produite, veuillez ressayer plur tard");
             return;
         }
+
         const content = validateContent(data.content);
         if ( !content ) {
-            res.status(400).send("Votre contribution ne doit pas dépasser 360 caractères");
+            res.status(400).send("Votre contribution ne doit pas dépasser 380 caractères");
             return;
         }
 
-        const subStory = await db.collection(`${data.ref}/sub-story`).add({
+        const subStoriesRef = `${data.ref}/sub-stories`;
+        const subStory = await db.collection(subStoriesRef).add({
             author: {
                 _id: user._id.toString(),
                 nickname: user.nickname ? user.nickname : `${user.firstname} ${user.lastname}`,
             },
             content: content,
             likes: [],
-            created_at: getIsoDate(new Date())
-        })
+            created_at: Date.now(),
+            reporting: 0,
+        });
+        if (!subStory) {
+            res.status(400).send("Une erreur s'est produite, veuillez ressayer plur tard");
+            return;
+        }
 
-        console.log(subStory);
-
-        res.send("HELLO")
+        const subStories = await findSubStories(subStoriesRef);
+        res.status(201).json(subStories.sort((a,b) => b.created_at - a.created_at));
 
     } catch (error) {
         console.log(error);
@@ -117,5 +122,24 @@ const findStoryByPath = async (ref) => {
         .catch ( error => reject(error))
     })
     
+
+}
+
+const findSubStories = async (ref) => {
+
+    return new Promise((resolve, reject) => {
+        db.collection(ref).get()
+        .then( subStories => {
+            if ( subStories.empty ) resolve([]);
+            else {
+                const subStoriesArray = [];
+                subStories.forEach( subStory => {
+                    subStoriesArray.push(Object.assign(subStory.data(),{ref: subStory.ref.path}))
+                })
+                resolve(subStoriesArray);
+            }
+        })
+        .catch( error => reject(error));
+    })
 
 }
