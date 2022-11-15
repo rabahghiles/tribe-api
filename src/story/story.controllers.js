@@ -55,7 +55,7 @@ export const createSubStory = async (req, res, next) => {
         }
 
         const subStoriesRef = `${data.ref}/sub-stories`;
-        const subStory = await db.collection(subStoriesRef).add({
+        const subStoryData = {
             author: {
                 _id: user._id.toString(),
                 nickname: user.nickname ? user.nickname : `${user.firstname} ${user.lastname}`,
@@ -64,20 +64,40 @@ export const createSubStory = async (req, res, next) => {
             likes: [],
             created_at: Date.now(),
             reporting: 0,
-        });
+        };
+        const subStory = await db.collection(subStoriesRef).add(subStoryData);
         if (!subStory) {
             res.status(400).send("Une erreur s'est produite, veuillez ressayer plur tard");
             return;
         }
 
-        const subStories = await findSubStories(subStoriesRef);
-        res.status(201).json(subStories.sort((a,b) => b.created_at - a.created_at));
+        res.status(201).json(Object.assign(subStoryData,{ref: subStory.path}));
 
     } catch (error) {
         console.log(error);
         res.status(500).send("Une erreur interne s'est produite, veuillez ressayer plus tard. Si le problème persiste, contactez le support.");
     }
 
+}
+
+export const getSubstoriesByRef = async (req, res, next) => {
+    try {
+
+        const ref = req.query.ref;
+
+        const story = await validateSubStoryRef(ref);
+        if ( !story ) {
+            res.status(400).send("La sous-histoire que vous essayez de récupérer n'existe plus");
+            return;
+        }
+
+        const subStories = await findSubStories(ref);
+        res.status(201).json(subStories.sort((a,b) => b.created_at - a.created_at));
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Une erreur interne s'est produite, veuillez ressayer plus tard. Si le problème persiste, contactez le support.");
+    }
 }
 
 
@@ -128,7 +148,7 @@ const findStoryByPath = async (ref) => {
 const findSubStories = async (ref) => {
 
     return new Promise((resolve, reject) => {
-        db.collection(ref).get()
+        db.collection(`${ref}/sub-stories`).get()
         .then( subStories => {
             if ( subStories.empty ) resolve([]);
             else {
